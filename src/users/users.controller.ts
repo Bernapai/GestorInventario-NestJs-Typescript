@@ -36,7 +36,7 @@ export class UsersController {
   ): Promise<User | null> {
     return await this.usersService.update(id, data);
   }
-
+  // Crear un usuario
   @Post()
   async register(@Body() data: UserCreateDto): Promise<User> {
     return await this.usersService.register(data);
