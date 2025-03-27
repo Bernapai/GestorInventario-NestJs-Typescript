@@ -43,18 +43,4 @@ export class TransactionsController {
   async delete(@Param('id') id: number): Promise<void> {
     return await this.transactionsService.delete(id);
   }
-
-  @Get(':id/products')
-  async getProducts(@Param('id') id: number): Promise<Transaction | null> {
-    try {
-      const products = await this.transactionsService.getProducts(id);
-      if (products instanceof Transaction || products === null) {
-        return products;
-      }
-      throw new Error('Invalid return type');
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      throw new Error('Failed to fetch products');
-    }
-  }
 }
