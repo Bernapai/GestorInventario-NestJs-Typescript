@@ -38,8 +38,4 @@ export class CategorysService {
   async delete(id: number): Promise<void> {
     await this.categorysRepository.delete({ id });
   }
-
-  async getCategorysBySupplierId(supplierId: number): Promise<Categorys[]> {
-    return await this.categorysRepository.find({ where: { supplierId } });
-  }
 }
