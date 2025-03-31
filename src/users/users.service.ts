@@ -41,4 +41,8 @@ export class UsersService {
     const result = await this.userRepository.delete(id);
     return (result.affected ?? 0) > 0;
   }
+
+  async findBByname(name: string): Promise<User | null> {
+    return await this.userRepository.findOne({ where: { name } });
+  }
 }
