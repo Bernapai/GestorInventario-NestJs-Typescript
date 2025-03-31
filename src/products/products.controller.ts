@@ -8,7 +8,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import Product from './products.entitys';
+import Product from './products.entity';
 import { ProductCreateDto } from './dto/productCreate.dto';
 import { ProductUpdateDto } from './dto/productUpdate.dto';
 

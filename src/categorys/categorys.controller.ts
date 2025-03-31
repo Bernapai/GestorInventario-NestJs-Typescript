@@ -12,7 +12,6 @@ import Categorys from './categorys.entity';
 import { CategoryCreateDto } from './dto/categorysCreate.dto';
 import { CategoryUpdateDto } from './dto/categorysUpdate.dto';
 
-
 @Controller('categorys')
 export class CategorysController {
   constructor(private readonly categorysService: CategorysService) { }
