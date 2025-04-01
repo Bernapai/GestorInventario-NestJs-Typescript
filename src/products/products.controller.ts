@@ -6,13 +6,16 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import Product from './products.entity';
 import { ProductCreateDto } from './dto/productCreate.dto';
 import { ProductUpdateDto } from './dto/productUpdate.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('products')
+@UseGuards(JwtAuthGuard) // Esto protegerá todas las rutas del controlador
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
   @Get()

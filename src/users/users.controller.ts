@@ -6,11 +6,13 @@ import {
   Param,
   Body,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import User from './users.entity';
 import { UserUpdateDto } from './dto/userUpdate.dto';
 import { UserCreateDto } from './dto/userCreate.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -28,7 +30,7 @@ export class UsersController {
   }
 
   // Actualizar un usuario por ID
-
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   async update(
     @Param('id') id: number,
@@ -43,6 +45,7 @@ export class UsersController {
   }
 
   // Eliminar un usuario por ID
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Param('id') id: number): Promise<boolean> {
     return await this.usersService.delete(id);

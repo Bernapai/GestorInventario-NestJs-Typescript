@@ -6,13 +6,16 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import Transaction from './transactions.entity';
 import { TransactionCreateDto } from './dto/transactionsCreate.dto';
 import { TransactionUpdateDto } from './dto/transactionsUpdate.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('transactions')
+@UseGuards(JwtAuthGuard) // Esto protegerá todas las rutas del controlador
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) { }
 

@@ -6,13 +6,16 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { CategorysService } from './categorys.service';
 import Categorys from './categorys.entity';
 import { CategoryCreateDto } from './dto/categorysCreate.dto';
 import { CategoryUpdateDto } from './dto/categorysUpdate.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('categorys')
+@UseGuards(JwtAuthGuard) // Esto protegerá todas las rutas del controlador
 export class CategorysController {
   constructor(private readonly categorysService: CategorysService) { }
 
