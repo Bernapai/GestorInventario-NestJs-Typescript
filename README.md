@@ -8,7 +8,7 @@ Este es un sistema de gestión de inventario desarrollado con **NestJS**, **Type
 - **PostgreSQL** (Base de datos relacional)
 - **TypeORM** (ORM para NestJS)
 - **JWT** (Autenticación y seguridad)
-- **Swagger** (Documentación de API)
+- **Swagger** (Documentación de API, Accedé en http://localhost:3000/api)
 
 ## Características Principales
 - **Gestión de Productos**: CRUD de productos con categorías.
