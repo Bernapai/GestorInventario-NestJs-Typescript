@@ -17,7 +17,7 @@ export class UsersService {
     return await this.userRepository.find();
   }
 
-  // Registrar un usuario usando UserCreateDto
+  // Registrar un usuario usando solo el DTO
   async register(data: UserCreateDto): Promise<User> {
     const newUser = this.userRepository.create(data);
     return await this.userRepository.save(newUser);
@@ -28,12 +28,12 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { id } });
   }
 
-  // Obtener un solo usuario por nombre
+  // Obtener un usuario por nombre
   async findByName(name: string): Promise<User | null> {
     return await this.userRepository.findOne({ where: { name } });
   }
 
-  // Actualizar un usuario por ID usando UserUpdateDto
+  // Actualizar un usuario por ID
   async update(id: number, data: UserUpdateDto): Promise<User | null> {
     await this.userRepository.update(id, data);
     return this.getOne(id);
@@ -43,9 +43,5 @@ export class UsersService {
   async delete(id: number): Promise<boolean> {
     const result = await this.userRepository.delete(id);
     return (result.affected ?? 0) > 0;
-  }
-
-  async findBByname(name: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { name } });
   }
 }

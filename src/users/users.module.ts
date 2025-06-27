@@ -6,6 +6,7 @@ import User from './users.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([User])], // Aquí deberías importar tus entidades de usuario
   controllers: [UsersController],
-  providers: [UsersService]
+  providers: [UsersService],
+  exports: [UsersService] // Exportamos el servicio para que pueda ser utilizado en otros módulos
 })
 export class UsersModule { }
