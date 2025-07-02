@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { SuppliersController } from './suppliers.controller';
-import { SuppliersService } from './suppliers.service';
+import { SuppliersController } from './controllers/suppliers.controller';
+import { SuppliersService } from './services/suppliers.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import Supplier from './suppliers.entity';
+import Supplier from './entities/suppliers.entity';
 
 
 @Module({
