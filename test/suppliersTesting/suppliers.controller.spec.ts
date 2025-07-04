@@ -5,6 +5,16 @@ import Suppliers from '../../src/suppliers/entities/suppliers.entity';
 import { SupplierCreateDto } from '../../src/suppliers/dto/suppliersCreate.dto';
 import { SupplierUpdateDto } from '../../src/suppliers/dto/suppliersUpdate.dto';
 
+
+// para que no bloquee tests
+jest.mock('src/auth/jwt-auth.guard', () => ({
+  JwtAuthGuard: class {
+    canActivate() {
+      return true;
+    }
+  },
+}));
+
 describe('SuppliersController', () => {
   let controller: SuppliersController;
 
@@ -35,7 +45,6 @@ describe('SuppliersController', () => {
     }).compile();
 
     controller = module.get<SuppliersController>(SuppliersController);
-
     jest.clearAllMocks();
   });
 
@@ -47,6 +56,12 @@ describe('SuppliersController', () => {
       expect(result).toEqual([mockSupplier]);
       expect(mockSuppliersService.getCallSites).toHaveBeenCalled();
     });
+
+    it('should throw an error if service fails', async () => {
+      mockSuppliersService.getCallSites.mockRejectedValue(new Error('Error al obtener proveedores'));
+
+      await expect(controller.getCallSites()).rejects.toThrow('Error al obtener proveedores');
+    });
   });
 
   describe('getOne', () => {
@@ -56,6 +71,12 @@ describe('SuppliersController', () => {
       const result = await controller.getOne(1);
       expect(result).toEqual(mockSupplier);
       expect(mockSuppliersService.getOne).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw an error if service fails', async () => {
+      mockSuppliersService.getOne.mockRejectedValue(new Error('Proveedor no encontrado'));
+
+      await expect(controller.getOne(1)).rejects.toThrow('Proveedor no encontrado');
     });
   });
 
@@ -73,6 +94,18 @@ describe('SuppliersController', () => {
       expect(result).toEqual({ id: 2, ...dto });
       expect(mockSuppliersService.create).toHaveBeenCalledWith(dto);
     });
+
+    it('should throw an error if creation fails', async () => {
+      const dto: SupplierCreateDto = {
+        name: 'Nuevo',
+        description: 'Nuevo proveedor',
+        phone: '987-654-3210',
+      };
+
+      mockSuppliersService.create.mockRejectedValue(new Error('Error al crear proveedor'));
+
+      await expect(controller.create(dto)).rejects.toThrow('Error al crear proveedor');
+    });
   });
 
   describe('update', () => {
@@ -86,6 +119,14 @@ describe('SuppliersController', () => {
       expect(result).toEqual(updated);
       expect(mockSuppliersService.update).toHaveBeenCalledWith(1, dto);
     });
+
+    it('should throw an error if update fails', async () => {
+      const dto: SupplierUpdateDto = { name: 'Actualizado' };
+
+      mockSuppliersService.update.mockRejectedValue(new Error('Error al actualizar proveedor'));
+
+      await expect(controller.update(1, dto)).rejects.toThrow('Error al actualizar proveedor');
+    });
   });
 
   describe('delete', () => {
@@ -95,6 +136,12 @@ describe('SuppliersController', () => {
       const result = await controller.delete(1);
       expect(result).toBeUndefined();
       expect(mockSuppliersService.delete).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw an error if deletion fails', async () => {
+      mockSuppliersService.delete.mockRejectedValue(new Error('Error al eliminar proveedor'));
+
+      await expect(controller.delete(1)).rejects.toThrow('Error al eliminar proveedor');
     });
   });
 });

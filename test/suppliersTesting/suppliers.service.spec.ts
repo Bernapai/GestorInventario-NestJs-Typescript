@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { SuppliersService } from './suppliers.service';
+import { SuppliersService } from 'src/suppliers/services/suppliers.service';
 import Suppliers from '../../src/suppliers/entities/suppliers.entity';
 import { SupplierCreateDto } from '../../src/suppliers/dto/suppliersCreate.dto';
 import { SupplierUpdateDto } from '../../src/suppliers/dto/suppliersUpdate.dto';
@@ -46,6 +46,11 @@ describe('SuppliersService', () => {
       expect(result).toEqual([mockSupplier]);
       expect(mockRepository.find).toHaveBeenCalled();
     });
+
+    it('should throw if repository fails', async () => {
+      mockRepository.find.mockRejectedValue(new Error('DB Error'));
+      await expect(service.getCallSites()).rejects.toThrow('DB Error');
+    });
   });
 
   describe('getOne', () => {
@@ -60,6 +65,11 @@ describe('SuppliersService', () => {
       mockRepository.findOne.mockResolvedValue(null);
       const result = await service.getOne(999);
       expect(result).toBeNull();
+    });
+
+    it('should throw if repository fails', async () => {
+      mockRepository.findOne.mockRejectedValue(new Error('FindOne error'));
+      await expect(service.getOne(1)).rejects.toThrow('FindOne error');
     });
   });
 
@@ -80,6 +90,21 @@ describe('SuppliersService', () => {
       expect(result).toEqual(createdSupplier);
       expect(mockRepository.create).toHaveBeenCalledWith(dto);
       expect(mockRepository.save).toHaveBeenCalledWith(createdSupplier);
+    });
+
+    it('should throw if save fails', async () => {
+      const dto: SupplierCreateDto = {
+        name: 'Nuevo Proveedor',
+        description: 'Descripción',
+        phone: '987-654-3210',
+      };
+
+      const createdSupplier = { id: 2, ...dto };
+
+      mockRepository.create.mockReturnValue(createdSupplier);
+      mockRepository.save.mockRejectedValue(new Error('Save failed'));
+
+      await expect(service.create(dto)).rejects.toThrow('Save failed');
     });
   });
 
@@ -110,6 +135,12 @@ describe('SuppliersService', () => {
         'Supplier with id 999 not found',
       );
     });
+
+    it('should throw if update fails', async () => {
+      mockRepository.update.mockRejectedValue(new Error('Update error'));
+
+      await expect(service.update(1, { name: 'Error' })).rejects.toThrow('Update error');
+    });
   });
 
   describe('delete', () => {
@@ -118,6 +149,12 @@ describe('SuppliersService', () => {
 
       await service.delete(1);
       expect(mockRepository.delete).toHaveBeenCalledWith({ id: 1 });
+    });
+
+    it('should throw if delete fails', async () => {
+      mockRepository.delete.mockRejectedValue(new Error('Delete error'));
+
+      await expect(service.delete(1)).rejects.toThrow('Delete error');
     });
   });
 });

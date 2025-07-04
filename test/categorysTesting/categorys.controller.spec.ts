@@ -5,6 +5,15 @@ import Categorys from '../../src/categorys/entities/categorys.entity';
 import { CategoryCreateDto } from '../../src/categorys/dto/categorysCreate.dto';
 import { CategoryUpdateDto } from '../../src/categorys/dto/categorysUpdate.dto';
 
+// para que no bloquee tests
+jest.mock('src/auth/jwt-auth.guard', () => ({
+  JwtAuthGuard: class {
+    canActivate() {
+      return true;
+    }
+  },
+}));
+
 describe('CategorysController', () => {
   let controller: CategorysController;
 
@@ -45,6 +54,11 @@ describe('CategorysController', () => {
       expect(result).toEqual([mockCategory]);
       expect(mockCategorysService.getCategorys).toHaveBeenCalled();
     });
+
+    it('should throw if service fails', async () => {
+      mockCategorysService.getCategorys.mockRejectedValue(new Error('Error al obtener categorías'));
+      await expect(controller.getCategorys()).rejects.toThrow('Error al obtener categorías');
+    });
   });
 
   describe('getOne', () => {
@@ -53,6 +67,11 @@ describe('CategorysController', () => {
       const result = await controller.getOne(1);
       expect(result).toEqual(mockCategory);
       expect(mockCategorysService.getOne).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw if service fails', async () => {
+      mockCategorysService.getOne.mockRejectedValue(new Error('Categoría no encontrada'));
+      await expect(controller.getOne(1)).rejects.toThrow('Categoría no encontrada');
     });
   });
 
@@ -68,6 +87,16 @@ describe('CategorysController', () => {
       expect(result).toEqual(mockCategory);
       expect(mockCategorysService.create).toHaveBeenCalledWith(dto);
     });
+
+    it('should throw if service fails', async () => {
+      const dto: CategoryCreateDto = {
+        name: 'New Category',
+        description: 'New Description',
+      };
+
+      mockCategorysService.create.mockRejectedValue(new Error('Error al crear categoría'));
+      await expect(controller.create(dto)).rejects.toThrow('Error al crear categoría');
+    });
   });
 
   describe('update', () => {
@@ -80,6 +109,11 @@ describe('CategorysController', () => {
       expect(result).toEqual(updatedCategory);
       expect(mockCategorysService.update).toHaveBeenCalledWith(1, dto);
     });
+
+    it('should throw if service fails', async () => {
+      mockCategorysService.update.mockRejectedValue(new Error('Error al actualizar categoría'));
+      await expect(controller.update(1, { name: 'Fail' })).rejects.toThrow('Error al actualizar categoría');
+    });
   });
 
   describe('delete', () => {
@@ -88,6 +122,11 @@ describe('CategorysController', () => {
       const result = await controller.delete(1);
       expect(result).toBeUndefined();
       expect(mockCategorysService.delete).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw if service fails', async () => {
+      mockCategorysService.delete.mockRejectedValue(new Error('Error al eliminar categoría'));
+      await expect(controller.delete(1)).rejects.toThrow('Error al eliminar categoría');
     });
   });
 });

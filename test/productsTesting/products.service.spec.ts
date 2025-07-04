@@ -63,6 +63,11 @@ describe('ProductsService', () => {
       expect(result).toEqual([mockProduct]);
       expect(mockRepository.find).toHaveBeenCalled();
     });
+
+    it('should throw if repository fails', async () => {
+      mockRepository.find.mockRejectedValue(new Error('DB error'));
+      await expect(service.getAll()).rejects.toThrow('DB error');
+    });
   });
 
   describe('getOne', () => {
@@ -77,6 +82,11 @@ describe('ProductsService', () => {
       mockRepository.findOne.mockResolvedValue(null);
       const result = await service.getOne(999);
       expect(result).toBeNull();
+    });
+
+    it('should throw if repository fails', async () => {
+      mockRepository.findOne.mockRejectedValue(new Error('FindOne error'));
+      await expect(service.getOne(1)).rejects.toThrow('FindOne error');
     });
   });
 
@@ -106,6 +116,29 @@ describe('ProductsService', () => {
       expect(mockRepository.create).toHaveBeenCalledWith(dto);
       expect(mockRepository.save).toHaveBeenCalledWith(createdProduct);
     });
+
+    it('should throw if save fails', async () => {
+      const dto: ProductCreateDto = {
+        name: 'Nuevo Producto',
+        description: 'Descripción',
+        price: 200,
+        stock: 10,
+        categoryId: 1,
+        supplierId: 1,
+      };
+
+      const createdProduct = {
+        id: 2,
+        ...dto,
+        category: mockCategory,
+        supplier: mockSupplier,
+      };
+
+      mockRepository.create.mockReturnValue(createdProduct);
+      mockRepository.save.mockRejectedValue(new Error('Save error'));
+
+      await expect(service.create(dto)).rejects.toThrow('Save error');
+    });
   });
 
   describe('update', () => {
@@ -129,6 +162,17 @@ describe('ProductsService', () => {
         'Product with id 1 not found',
       );
     });
+
+    it('should throw if update fails', async () => {
+      mockRepository.update.mockRejectedValue(new Error('Update failed'));
+      await expect(service.update(1, { stock: 0 })).rejects.toThrow('Update failed');
+    });
+
+    it('should throw if findOne fails after update', async () => {
+      mockRepository.update.mockResolvedValue(undefined);
+      mockRepository.findOne.mockRejectedValue(new Error('FindOne failed'));
+      await expect(service.update(1, { stock: 1 })).rejects.toThrow('FindOne failed');
+    });
   });
 
   describe('delete', () => {
@@ -136,6 +180,11 @@ describe('ProductsService', () => {
       mockRepository.delete.mockResolvedValue(undefined);
       await service.delete(1);
       expect(mockRepository.delete).toHaveBeenCalledWith({ id: 1 });
+    });
+
+    it('should throw if delete fails', async () => {
+      mockRepository.delete.mockRejectedValue(new Error('Delete error'));
+      await expect(service.delete(1)).rejects.toThrow('Delete error');
     });
   });
 });

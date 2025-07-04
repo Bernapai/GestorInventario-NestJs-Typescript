@@ -5,6 +5,16 @@ import { UserCreateDto } from '../../src/users/dto/userCreate.dto';
 import { UserUpdateDto } from '../../src/users/dto/userUpdate.dto';
 import User from '../../src/users/entities/users.entity';
 
+// para que no bloquee tests
+jest.mock('src/auth/jwt-auth.guard', () => ({
+  JwtAuthGuard: class {
+    canActivate() {
+      return true;
+    }
+  },
+}));
+
+
 describe('UsersController', () => {
   let controller: UsersController;
 
