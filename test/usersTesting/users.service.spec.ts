@@ -44,6 +44,11 @@ describe('UsersService', () => {
       expect(result).toEqual(users);
       expect(mockUserRepository.find).toHaveBeenCalled();
     });
+
+    it('should throw error if find fails', async () => {
+      mockUserRepository.find.mockRejectedValue(new Error('DB error'));
+      await expect(service.getAll()).rejects.toThrow('DB error');
+    });
   });
 
   describe('register', () => {
@@ -63,6 +68,20 @@ describe('UsersService', () => {
       expect(mockUserRepository.create).toHaveBeenCalledWith(dto);
       expect(mockUserRepository.save).toHaveBeenCalledWith(newUser);
     });
+
+    it('should throw error if save fails', async () => {
+      const dto: UserCreateDto = {
+        name: 'Test',
+        email: 'test@example.com',
+        password: '123456',
+      };
+      const newUser = { id: 1, ...dto } as User;
+
+      mockUserRepository.create.mockReturnValue(newUser);
+      mockUserRepository.save.mockRejectedValue(new Error('Save error'));
+
+      await expect(service.register(dto)).rejects.toThrow('Save error');
+    });
   });
 
   describe('getOne', () => {
@@ -76,6 +95,18 @@ describe('UsersService', () => {
         where: { id: 1 },
       });
     });
+
+    it('should return null if user not found', async () => {
+      mockUserRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.getOne(999);
+      expect(result).toBeNull();
+    });
+
+    it('should throw error if findOne fails', async () => {
+      mockUserRepository.findOne.mockRejectedValue(new Error('FindOne error'));
+      await expect(service.getOne(1)).rejects.toThrow('FindOne error');
+    });
   });
 
   describe('findByName', () => {
@@ -88,6 +119,18 @@ describe('UsersService', () => {
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
         where: { name: 'John' },
       });
+    });
+
+    it('should return null if user not found', async () => {
+      mockUserRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findByName('NoName');
+      expect(result).toBeNull();
+    });
+
+    it('should throw error if findOne fails', async () => {
+      mockUserRepository.findOne.mockRejectedValue(new Error('FindByName error'));
+      await expect(service.findByName('Test')).rejects.toThrow('FindByName error');
     });
   });
 
@@ -106,6 +149,30 @@ describe('UsersService', () => {
         where: { id: 1 },
       });
     });
+
+    it('should return null if user not found after update', async () => {
+      const dto: UserUpdateDto = { name: 'Updated' };
+      mockUserRepository.update.mockResolvedValue({ affected: 1 });
+      mockUserRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.update(999, dto);
+      expect(result).toBeNull();
+    });
+
+    it('should throw error if update fails', async () => {
+      const dto: UserUpdateDto = { name: 'Updated' };
+      mockUserRepository.update.mockRejectedValue(new Error('Update error'));
+
+      await expect(service.update(1, dto)).rejects.toThrow('Update error');
+    });
+
+    it('should throw error if findOne fails after update', async () => {
+      const dto: UserUpdateDto = { name: 'Updated' };
+      mockUserRepository.update.mockResolvedValue({ affected: 1 });
+      mockUserRepository.findOne.mockRejectedValue(new Error('FindOne error'));
+
+      await expect(service.update(1, dto)).rejects.toThrow('FindOne error');
+    });
   });
 
   describe('delete', () => {
@@ -122,6 +189,11 @@ describe('UsersService', () => {
 
       const result = await service.delete(999);
       expect(result).toBe(false);
+    });
+
+    it('should throw error if delete fails', async () => {
+      mockUserRepository.delete.mockRejectedValue(new Error('Delete error'));
+      await expect(service.delete(1)).rejects.toThrow('Delete error');
     });
   });
 

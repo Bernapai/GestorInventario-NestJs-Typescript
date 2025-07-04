@@ -42,62 +42,82 @@ describe('UsersController', () => {
   });
 
   describe('getAll', () => {
-    it('should return all users', async () => {
+    it('should return an array of users', async () => {
       mockUsersService.getAll.mockResolvedValue([mockUser]);
-
       const result = await controller.getAll();
       expect(result).toEqual([mockUser]);
       expect(mockUsersService.getAll).toHaveBeenCalled();
     });
+
+    it('should handle errors', async () => {
+      mockUsersService.getAll.mockRejectedValue(new Error('DB error'));
+      await expect(controller.getAll()).rejects.toThrow('DB error');
+    });
   });
 
   describe('getOne', () => {
-    it('should return user by id', async () => {
+    it('should return a user by id', async () => {
       mockUsersService.getOne.mockResolvedValue(mockUser);
-
       const result = await controller.getOne(1);
       expect(result).toEqual(mockUser);
       expect(mockUsersService.getOne).toHaveBeenCalledWith(1);
+    });
+
+    it('should return null if user not found', async () => {
+      mockUsersService.getOne.mockResolvedValue(null);
+      const result = await controller.getOne(999);
+      expect(result).toBeNull();
+    });
+
+    it('should handle errors', async () => {
+      mockUsersService.getOne.mockRejectedValue(new Error('DB error'));
+      await expect(controller.getOne(1)).rejects.toThrow('DB error');
     });
   });
 
   describe('register', () => {
     it('should create and return a new user', async () => {
       const dto: UserCreateDto = {
-        name: 'Alice',
-        email: 'alice@example.com',
-        password: 'secure123',
+        name: 'Bob',
+        email: 'bob@example.com',
+        password: 'pass123',
       };
-
       mockUsersService.register.mockResolvedValue(mockUser);
-
       const result = await controller.register(dto);
       expect(result).toEqual(mockUser);
       expect(mockUsersService.register).toHaveBeenCalledWith(dto);
     });
+
+    it('should handle errors', async () => {
+      mockUsersService.register.mockRejectedValue(new Error('Validation error'));
+      await expect(controller.register({ name: '', email: '', password: '' })).rejects.toThrow('Validation error');
+    });
   });
 
   describe('update', () => {
-    it('should update and return user', async () => {
-      const dto: UserUpdateDto = {
-        name: 'Updated Name',
-        email: 'updated@example.com',
-        password: 'newpass123',
-      };
-
-      const updatedUser = { ...mockUser, ...dto };
-      mockUsersService.update.mockResolvedValue(updatedUser);
-
+    it('should update and return the user', async () => {
+      const dto: UserUpdateDto = { name: 'Alice Updated' };
+      mockUsersService.update.mockResolvedValue({ ...mockUser, ...dto });
       const result = await controller.update(1, dto);
-      expect(result).toEqual(updatedUser);
+      expect(result).toEqual({ ...mockUser, ...dto });
       expect(mockUsersService.update).toHaveBeenCalledWith(1, dto);
+    });
+
+    it('should return null if user not found', async () => {
+      mockUsersService.update.mockResolvedValue(null);
+      const result = await controller.update(999, { name: 'No User' });
+      expect(result).toBeNull();
+    });
+
+    it('should handle errors', async () => {
+      mockUsersService.update.mockRejectedValue(new Error('Update error'));
+      await expect(controller.update(1, { name: 'err' })).rejects.toThrow('Update error');
     });
   });
 
   describe('delete', () => {
-    it('should delete user and return true', async () => {
+    it('should return true if user deleted', async () => {
       mockUsersService.delete.mockResolvedValue(true);
-
       const result = await controller.delete(1);
       expect(result).toBe(true);
       expect(mockUsersService.delete).toHaveBeenCalledWith(1);
@@ -105,9 +125,14 @@ describe('UsersController', () => {
 
     it('should return false if user not found', async () => {
       mockUsersService.delete.mockResolvedValue(false);
-
       const result = await controller.delete(999);
       expect(result).toBe(false);
     });
+
+    it('should handle errors', async () => {
+      mockUsersService.delete.mockRejectedValue(new Error('Delete error'));
+      await expect(controller.delete(1)).rejects.toThrow('Delete error');
+    });
   });
 });
+
