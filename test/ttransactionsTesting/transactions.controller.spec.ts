@@ -92,6 +92,11 @@ describe('TransactionsController', () => {
       expect(result).toEqual([mockTransaction]);
       expect(mockTransactionsService.getAll).toHaveBeenCalled();
     });
+
+    it('should throw if service throws', async () => {
+      mockTransactionsService.getAll.mockRejectedValue(new Error('Service error'));
+      await expect(controller.getAll()).rejects.toThrow('Service error');
+    });
   });
 
   describe('getOne', () => {
@@ -101,6 +106,11 @@ describe('TransactionsController', () => {
       const result = await controller.getOne(1);
       expect(result).toEqual(mockTransaction);
       expect(mockTransactionsService.getOne).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw if service throws', async () => {
+      mockTransactionsService.getOne.mockRejectedValue(new Error('Not found'));
+      await expect(controller.getOne(1)).rejects.toThrow('Not found');
     });
   });
 
@@ -120,6 +130,18 @@ describe('TransactionsController', () => {
       expect(result).toEqual(mockTransaction);
       expect(mockTransactionsService.create).toHaveBeenCalledWith(dto);
     });
+
+    it('should throw if service throws', async () => {
+      const dto: TransactionCreateDto = {
+        userId: mockUser.id,
+        productId: mockProduct.id,
+        quantity: 3,
+        totalPrice: 150,
+        date: new Date(),
+      };
+      mockTransactionsService.create.mockRejectedValue(new Error('Create error'));
+      await expect(controller.create(dto)).rejects.toThrow('Create error');
+    });
   });
 
   describe('update', () => {
@@ -137,6 +159,15 @@ describe('TransactionsController', () => {
       expect(result).toEqual(updatedTransaction);
       expect(mockTransactionsService.update).toHaveBeenCalledWith(1, dto);
     });
+
+    it('should throw if service throws', async () => {
+      const dto: TransactionUpdateDto = {
+        quantity: 5,
+        totalPrice: 250,
+      };
+      mockTransactionsService.update.mockRejectedValue(new Error('Update error'));
+      await expect(controller.update(1, dto)).rejects.toThrow('Update error');
+    });
   });
 
   describe('delete', () => {
@@ -147,5 +178,11 @@ describe('TransactionsController', () => {
       expect(result).toBeUndefined();
       expect(mockTransactionsService.delete).toHaveBeenCalledWith(1);
     });
+
+    it('should throw if service throws', async () => {
+      mockTransactionsService.delete.mockRejectedValue(new Error('Delete error'));
+      await expect(controller.delete(1)).rejects.toThrow('Delete error');
+    });
   });
+
 });

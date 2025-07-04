@@ -8,6 +8,7 @@ import { TransactionUpdateDto } from '../../src/transactions/dto/transactionsUpd
 import User from 'src/users/entities/users.entity';
 import Product from 'src/products/entities/products.entity';
 import Categorys from 'src/categorys/entities/categorys.entity';
+import Suppliers from 'src/suppliers/entities/suppliers.entity';
 
 describe('TransactionsService', () => {
   let service: TransactionsService;
@@ -37,7 +38,7 @@ describe('TransactionsService', () => {
     products: [],
   };
 
-  const mockSupplier = {
+  const mockSupplier: Suppliers = {
     id: 1,
     name: 'Supplier Test',
     description: 'A test supplier',
@@ -87,6 +88,11 @@ describe('TransactionsService', () => {
       expect(result).toEqual([mockTransaction]);
       expect(mockTransactionRepository.find).toHaveBeenCalled();
     });
+
+    it('should throw if repository throws', async () => {
+      mockTransactionRepository.find.mockRejectedValue(new Error('DB error'));
+      await expect(service.getAll()).rejects.toThrow('DB error');
+    });
   });
 
   describe('getOne', () => {
@@ -105,6 +111,11 @@ describe('TransactionsService', () => {
 
       const result = await service.getOne(999);
       expect(result).toBeNull();
+    });
+
+    it('should throw if repository throws', async () => {
+      mockTransactionRepository.findOne.mockRejectedValue(new Error('DB error'));
+      await expect(service.getOne(1)).rejects.toThrow('DB error');
     });
   });
 
@@ -134,6 +145,44 @@ describe('TransactionsService', () => {
       expect(result).toEqual(created);
       expect(mockTransactionRepository.create).toHaveBeenCalledWith(dto);
       expect(mockTransactionRepository.save).toHaveBeenCalledWith(created);
+    });
+
+    it('should throw if repository throws on create', async () => {
+      const dto: TransactionCreateDto = {
+        userId: mockUser.id,
+        productId: mockProduct.id,
+        quantity: 3,
+        totalPrice: 299.97,
+        date: new Date(),
+      };
+
+      mockTransactionRepository.create.mockImplementation(() => { throw new Error('Create error'); });
+
+      await expect(service.create(dto)).rejects.toThrow('Create error');
+    });
+
+    it('should throw if repository throws on save', async () => {
+      const dto: TransactionCreateDto = {
+        userId: mockUser.id,
+        productId: mockProduct.id,
+        quantity: 3,
+        totalPrice: 299.97,
+        date: new Date(),
+      };
+
+      const created: Transaction = {
+        id: 2,
+        user: mockUser,
+        product: mockProduct,
+        quantity: dto.quantity,
+        totalPrice: dto.totalPrice,
+        date: dto.date,
+      };
+
+      mockTransactionRepository.create.mockReturnValue(created);
+      mockTransactionRepository.save.mockRejectedValue(new Error('Save error'));
+
+      await expect(service.create(dto)).rejects.toThrow('Save error');
     });
   });
 
@@ -173,6 +222,29 @@ describe('TransactionsService', () => {
         'Transaction with id 999 not found',
       );
     });
+
+    it('should throw if repository throws on update', async () => {
+      const dto: TransactionUpdateDto = {
+        quantity: 4,
+        totalPrice: 399.96,
+      };
+
+      mockTransactionRepository.update.mockRejectedValue(new Error('Update error'));
+
+      await expect(service.update(1, dto)).rejects.toThrow('Update error');
+    });
+
+    it('should throw if repository throws on findOne after update', async () => {
+      const dto: TransactionUpdateDto = {
+        quantity: 4,
+        totalPrice: 399.96,
+      };
+
+      mockTransactionRepository.update.mockResolvedValue(undefined);
+      mockTransactionRepository.findOne.mockRejectedValue(new Error('FindOne error'));
+
+      await expect(service.update(1, dto)).rejects.toThrow('FindOne error');
+    });
   });
 
   describe('delete', () => {
@@ -181,6 +253,11 @@ describe('TransactionsService', () => {
 
       await service.delete(1);
       expect(mockTransactionRepository.delete).toHaveBeenCalledWith({ id: 1 });
+    });
+
+    it('should throw if repository throws', async () => {
+      mockTransactionRepository.delete.mockRejectedValue(new Error('Delete error'));
+      await expect(service.delete(1)).rejects.toThrow('Delete error');
     });
   });
 });
