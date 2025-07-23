@@ -20,7 +20,12 @@ async function bootstrap() {
     .setTitle('Gestor de Inventario')
     .setDescription('Documentación de la API del sistema de inventario')
     .setVersion('1.0')
-    .addTag('inventario') // Opcional, para agrupar endpoints
+    .addTag('Users') // Opcional, para agrupar endpoints
+    .addTag('Transactions')
+    .addTag('Suppliers')
+    .addTag('Products')
+    .addTag('Categories')
+    .addTag('Auth')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
