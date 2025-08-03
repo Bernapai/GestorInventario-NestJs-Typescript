@@ -2,9 +2,19 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { loggerConfig } from './config/logging/logger.config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: loggerConfig, // Configuración del logger
+  });
+
+
+  // Crear directorio de logs 
+  const fs = require('fs');
+  if (!fs.existsSync('logs')) {
+    fs.mkdirSync('logs');
+  }
 
   // Habilita la validación automática de DTOs
   app.useGlobalPipes(
