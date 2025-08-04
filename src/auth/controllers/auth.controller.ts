@@ -3,6 +3,7 @@ import { loginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { AuthService } from '../services/auth.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -10,6 +11,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post('login')
+  @Throttle({ long: { limit: 5, ttl: 60000 } }) // 
   @ApiOperation({ summary: 'Iniciar sesión' })
   @ApiResponse({ status: 200, description: 'Inicio de sesión exitoso' })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
@@ -18,6 +20,7 @@ export class AuthController {
   }
 
   @Post('register')
+  @Throttle({ long: { limit: 3, ttl: 60000 } })
   @ApiOperation({ summary: 'Registrar nuevo usuario' })
   @ApiResponse({ status: 201, description: 'Usuario creado con éxito' })
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
