@@ -4,8 +4,9 @@ import { ProductsService } from './services/products.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import Product from '../../src/products/entities/products.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { AppCacheModule } from 'src/cache/cache.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([Product]), AuthModule],
+  imports: [TypeOrmModule.forFeature([Product]), AuthModule, AppCacheModule],
   controllers: [ProductsController],
   providers: [ProductsService]
 })
